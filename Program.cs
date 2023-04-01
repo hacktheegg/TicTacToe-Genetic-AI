@@ -6,6 +6,8 @@ using System.Text;
 using System.Threading.Tasks;
 using System.IO;
 
+using ObjectList;
+
 
 
 class Program
@@ -17,58 +19,107 @@ class Program
         Board[1] = new int[3] { 0, 0, 0 };
         Board[2] = new int[3] { 0, 0, 0 };
 
+        bool turn = false;
 
+        PrintTicTacToe(Board);
+        Console.ReadKey(true);
+        // false = X
+        //  true = O
 
+        //while (CheckState(Board))
+        //{
+        //
+        //}
     }
 
 
 
-    public static bool CheckState(int[,] Board)
+    public static bool CheckState(int[][] Board)
     {
         if (CheckStateVertical(Board))
         {
             return true;
-        } else if (CheckStateVertical(Board))
+        } else if (CheckStateHorizontal(Board))
         {
             return true;
-        } else if (CheckStateVertical(Board))
+        } else if (CheckStateDiagonal(Board))
         {
             return true;
         }
         return false;
     }
-    public static bool CheckStateVertical(int[,] Board)
+    public static bool CheckStateVertical(int[][] Board)
     {
         for (int iterate = 0; iterate <= 2; iterate++)
         {
-            if (Board[iterate, 0] == Board[iterate, 1] && Board[iterate, 1] == Board[iterate, 2])
+            if (Board[iterate][0] == Board[iterate][1] && Board[iterate][1] == Board[iterate][2])
             {
                 return true;
             }
         }
         return false;
     }
-    public static bool CheckStateHorizontal(int[,] Board)
+    public static bool CheckStateHorizontal(int[][] Board)
     {
         for (int iterate = 0; iterate <= 2; iterate++)
         {
-            if (Board[0, iterate] == Board[1, iterate] && Board[1, iterate] == Board[2, iterate])
+            if (Board[0][iterate] == Board[1][iterate] && Board[1][iterate] == Board[2][iterate])
             {
                 return true;
             }
         }
         return false;
     }
-    public static bool CheckStateDiagonal(int[,] Board)
+    public static bool CheckStateDiagonal(int[][] Board)
     {
-        if (Board[0, 0] == Board[1, 1] && Board[1, 1] == Board[2, 2])
+        if (Board[0][0] == Board[1][1] && Board[1][1] == Board[2][2])
+        {
+            return true;
+        } else if (Board[2][0] == Board[1][1] && Board[1][1] == Board[0][2])
         {
             return true;
         }
         return false;
     }
 
+    public static void PrintTicTacToe(int[][] TicTacToe)
+    {
+        Line line;
+        Circle circle;
 
+        string[][] board = Board.Create(25, 25);
+        board = Square.Create(new Square(25, 25, Tuple.Create(0, 0)), board);
+        board = Line.Create(new Line(Tuple.Create(8, 2), Tuple.Create(8, 23)), board);
+        board = Line.Create(new Line(Tuple.Create(16, 2), Tuple.Create(16, 23)), board);
+        board = Line.Create(new Line(Tuple.Create(2, 8), Tuple.Create(23, 8)), board);
+        board = Line.Create(new Line(Tuple.Create(2, 16), Tuple.Create(23, 16)), board);
+
+        for (int Yitorator = 0; Yitorator < TicTacToe.Length; Yitorator++)
+        {
+            for (int Xitorator = 0; Xitorator < TicTacToe[Yitorator].Length; Xitorator++)
+            {
+                if (TicTacToe[Yitorator][Xitorator] == 1)
+                {
+                    line = new Line(
+                        Tuple.Create((Xitorator * 8) + 4 - 2, (Yitorator * 8) + 4 - 2),
+                        Tuple.Create((Xitorator * 8) + 4 + 3, (Yitorator * 8) + 4 + 3));
+                    board = Line.Create(line, board);
+
+                    line = new Line(
+                        Tuple.Create((Xitorator * 8) + 4 - 2, (Yitorator * 8) + 4 + 2),
+                        Tuple.Create((Xitorator * 8) + 4 + 3, (Yitorator * 8) + 4 - 3));
+                    board = Line.Create(line, board);
+                } else if (TicTacToe[Yitorator][Xitorator] == 2)
+                {
+                    circle = new Circle(3, Tuple.Create((Xitorator * 8) + 4, (Yitorator * 8) + 4));
+                    board = Circle.Create(circle, board);
+                }
+                //Board[Yitorator][Xitorator] = (Xitorator*Difference)+Offset
+            }
+        }
+
+        Board.Print(board);
+    }
 
 
 
