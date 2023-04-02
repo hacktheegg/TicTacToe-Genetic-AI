@@ -7,8 +7,7 @@ using System.Threading.Tasks;
 using System.IO;
 
 using ObjectList;
-
-
+using System.Diagnostics.Contracts;
 
 class Program
 {
@@ -20,19 +19,79 @@ class Program
         Board[2] = new int[3] { 0, 0, 0 };
 
         bool turn = false;
-
-        PrintTicTacToe(Board);
+        bool failedTurn = false;
+        
+        int tempInt;
+        
         Console.ReadKey(true);
         // false = X
         //  true = O
 
-        //while (CheckState(Board))
-        //{
-        //
-        //}
+        while (!CheckState(Board))
+        {
+            failedTurn:
+            Console.Clear();
+            PrintTicTacToe(Board);
+            
+            if (failedTurn)
+            {
+                Console.WriteLine("INVALID INPUT");
+            }
+
+            Console.WriteLine("Player \"" + XY(turn) + "\", it is currently your turn");
+
+            Console.Write("X Axis: ");
+            string XAxisString = Console.ReadKey(false).KeyChar.ToString().ToLower();
+            if (!int.TryParse(XAxisString, out tempInt))
+            {
+                failedTurn = true;
+                goto failedTurn;
+            }
+            else if (int.Parse(XAxisString) < 1 || int.Parse(XAxisString) > 3)
+            {
+                failedTurn = true;
+                goto failedTurn;
+            }
+            int XAxis = int.Parse(XAxisString) - 1;
+
+            Console.Write("\nY Axis: ");
+            string YAxisString = Console.ReadKey(false).KeyChar.ToString().ToLower();
+            if (!int.TryParse(YAxisString, out tempInt))
+            {
+                failedTurn = true;
+                goto failedTurn;
+            } else if (int.Parse(YAxisString) < 1 || int.Parse(YAxisString) > 3)
+            {
+                failedTurn = true;
+                goto failedTurn;
+            }
+            int YAxis = int.Parse(YAxisString) - 1;
+
+            if (!turn)
+            {
+                Board[YAxis][XAxis] = 1;
+            } else
+            {
+                Board[YAxis][XAxis] = 2;
+            }
+            
+
+            turn = !turn;
+            Console.ReadKey(true);
+        }
     }
-
-
+    
+    public static string XY(bool turn)
+    {
+        if (turn == false)
+        {
+            return "X";
+        }
+        else
+        {
+            return "O";
+        }
+    }
 
     public static bool CheckState(int[][] Board)
     {
@@ -52,7 +111,7 @@ class Program
     {
         for (int iterate = 0; iterate <= 2; iterate++)
         {
-            if (Board[iterate][0] == Board[iterate][1] && Board[iterate][1] == Board[iterate][2])
+            if (Board[iterate][0] == Board[iterate][1] && Board[iterate][1] == Board[iterate][2] && Board[iterate][0] != 0)
             {
                 return true;
             }
@@ -63,7 +122,7 @@ class Program
     {
         for (int iterate = 0; iterate <= 2; iterate++)
         {
-            if (Board[0][iterate] == Board[1][iterate] && Board[1][iterate] == Board[2][iterate])
+            if (Board[0][iterate] == Board[1][iterate] && Board[1][iterate] == Board[2][iterate] && Board[0][iterate] != 0)
             {
                 return true;
             }
@@ -72,10 +131,10 @@ class Program
     }
     public static bool CheckStateDiagonal(int[][] Board)
     {
-        if (Board[0][0] == Board[1][1] && Board[1][1] == Board[2][2])
+        if (Board[0][0] == Board[1][1] && Board[1][1] == Board[2][2] && Board[0][0] != 0)
         {
             return true;
-        } else if (Board[2][0] == Board[1][1] && Board[1][1] == Board[0][2])
+        } else if (Board[2][0] == Board[1][1] && Board[1][1] == Board[0][2] && Board[2][0] != 0)
         {
             return true;
         }
