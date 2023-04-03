@@ -23,7 +23,7 @@ class Program
         
         int tempInt;
         
-        Console.ReadKey(true);
+        //Console.ReadKey(true);
         // false = X
         //  true = O
 
@@ -67,6 +67,14 @@ class Program
             }
             int YAxis = int.Parse(YAxisString) - 1;
 
+
+            if (Board[YAxis][XAxis] != 0)
+            {
+                failedTurn = true;
+                goto failedTurn;
+            }
+
+
             if (!turn)
             {
                 Board[YAxis][XAxis] = 1;
@@ -77,7 +85,7 @@ class Program
             
 
             turn = !turn;
-            Console.ReadKey(true);
+            failedTurn = false;
         }
     }
     
