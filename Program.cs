@@ -13,6 +13,26 @@ class Program
 {
     static void Main(string[] args)
     {
+        /*int[][] nestedArray = new int[][] { new int[] { 1, 2 }, new int[] { 3, 4, 5 }, new int[] { 6, 7, 8, 9 } };
+        int searchValue = 4;
+        bool found = nestedArray.SelectMany(x => x).Any(x => x == searchValue);
+
+        if (found)
+        {
+            Console.WriteLine("Value found!");
+        }
+        else
+        {
+            Console.WriteLine("Value not found.");
+        }
+        Console.ReadKey(true);*/
+
+
+        Game();
+    }
+
+    public static void Game()
+    {
         int[][] Board = new int[3][];
         Board[0] = new int[3] { 0, 0, 0 };
         Board[1] = new int[3] { 0, 0, 0 };
@@ -20,19 +40,19 @@ class Program
 
         bool turn = false;
         bool failedTurn = false;
-        
+
         int tempInt;
-        
+
         //Console.ReadKey(true);
         // false = X
         //  true = O
 
-        while (!CheckState(Board))
+        while (!(CheckState(Board) || !Board.SelectMany(x => x).Any(x => x == 0)))
         {
-            failedTurn:
+        failedTurn:
             Console.Clear();
             PrintTicTacToe(Board);
-            
+
             if (failedTurn)
             {
                 Console.WriteLine("INVALID INPUT");
@@ -60,7 +80,8 @@ class Program
             {
                 failedTurn = true;
                 goto failedTurn;
-            } else if (int.Parse(YAxisString) < 1 || int.Parse(YAxisString) > 3)
+            }
+            else if (int.Parse(YAxisString) < 1 || int.Parse(YAxisString) > 3)
             {
                 failedTurn = true;
                 goto failedTurn;
@@ -78,15 +99,28 @@ class Program
             if (!turn)
             {
                 Board[YAxis][XAxis] = 1;
-            } else
+            }
+            else
             {
                 Board[YAxis][XAxis] = 2;
             }
-            
+
 
             turn = !turn;
             failedTurn = false;
         }
+
+        Console.Clear();
+        PrintTicTacToe(Board);
+        if (CheckState(Board))
+        {
+            Console.WriteLine("Congrats \"" + XY(!turn) + "\", You won!");
+        }
+        else
+        {
+            Console.WriteLine("It seems it is a tie, Good game for both sides.");
+        }
+        Console.ReadKey(true);
     }
     
     public static string XY(bool turn)
