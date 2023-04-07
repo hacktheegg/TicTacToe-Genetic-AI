@@ -8,46 +8,261 @@ using System.IO;
 
 using ObjectList;
 using System.Diagnostics.Contracts;
+using ChatGPT_based_AI_for_TicTacToe;
+using Microsoft.VisualBasic;
 
 class Program
 {
+    static Random random = new Random();
+    static int populationSize = 50;
+    static int mutationRate = 10; // percentage
+    static int elitism = 10; // percentage
+    //static int[] target = new int[] { 1, 2, 3, 4, 5, 6, 7, 8, 9 }; // target array to match
+
     static void Main(string[] args)
     {
-        /*int[][] nestedArray = new int[][] { new int[] { 1, 2 }, new int[] { 3, 4, 5 }, new int[] { 6, 7, 8, 9 } };
-        int searchValue = 4;
-        bool found = nestedArray.SelectMany(x => x).Any(x => x == searchValue);
-
-        if (found)
+        // Create initial population //
+        // POPULATION A
+        int[][] populationA = new int[populationSize][];
+        for (int i = 0; i < populationSize; i++)
         {
-            Console.WriteLine("Value found!");
+            populationA[i] = GenerateRandomArray();
         }
-        else
+        // POPULATION B
+        int[][] populationB = new int[populationSize][];
+        for (int i = 0; i < populationSize; i++)
         {
-            Console.WriteLine("Value not found.");
+            populationB[i] = GenerateRandomArray();
         }
-        Console.ReadKey(true);*/
 
 
-        Game();
+
+        // Evolution loop
+        int generation = 1;
+        while (true)
+        {
+            // Sort population by fitness //
+
+            populationA = populationA.OrderBy(x => Fitness(x)).ToArray();
+            // POPULATION B
+            populationB = populationB.OrderBy(x => Fitness(x)).ToArray();
+
+
+
+            // Create new generation
+            int[][] newPopulation = new int[populationSize][];
+            int elitismCount = populationSize * elitism / 100;
+
+            // Elitism: copy top percentage of population to next generation
+            for (int i = 0; i < elitismCount; i++)
+            {
+                newPopulation[i] = populationA[i].ToArray();
+            }
+
+            // Breed remaining population
+            for (int i = elitismCount; i < populationSize; i++)
+            {
+                int[] parent1 = SelectParent(populationA);
+                int[] parent2 = SelectParent(populationA);
+                int[] child = Breed(parent1, parent2);
+                newPopulation[i] = child;
+            }
+
+            // Mutate new generation
+            for (int i = elitismCount; i < populationSize; i++)
+            {
+                if (random.Next(0, 100) < mutationRate)
+                {
+                    Mutate(newPopulation[i]);
+                }
+            }
+
+            populationA = newPopulation;
+            generation++;
+        }
     }
+
+
+
+    static int[] GenerateRandomArray()
+    {
+        int[] array = Enumerable.Range(1, 9).ToArray();
+        for (int i = 0; i < array.Length; i++)
+        {
+            int randomIndex = random.Next(i, array.Length);
+            int temp = array[i];
+            array[i] = array[randomIndex];
+            array[randomIndex] = temp;
+        }
+        return array;
+    }
+
+    static int Fitness(int[] arrayA, int[] arrayB)
+    {
+        int fitness = 0;
+        for (int i = 0; i < array.Length; i++)
+        {
+            if (array[i] == target[i])
+            {
+                fitness++;
+            }
+        }
+
+        return fitness;
+    }
+
+    static int[] SelectParent(int[][] population)
+    {
+        int totalFitness = population.Sum(x => Fitness(x));
+        int randomFitness = random.Next(0, totalFitness);
+        int index = 0;
+        while (randomFitness > 0)
+        {
+            randomFitness -= Fitness(population[index]);
+            index++;
+        }
+
+        return index == 0 ? population[index] : population[index - 1];
+    }
+
+    static int[] Breed(int[] parent1, int[] parent2)
+    {
+        int[] child = new int[parent1.Length];
+        int start = random.Next(0, parent1.Length);
+        int end = random.Next(start, parent1.Length);
+        for (int i = start; i <= end; i++)
+        {
+            child[i] = parent1[i];
+        }
+        for (int i = 0; i < parent2.Length; i++)
+        {
+            if (!child.Contains(parent2[i]))
+            {
+                for (int j = 0; j < child.Length; j++)
+                {
+                    if (child[j] == 0)
+                    {
+                        child[j] = parent2[i];
+                        break;
+                    }
+                }
+            }
+        }
+        return child;
+    }
+
+    static void Mutate(int[] array)
+    {
+        int index1 = random.Next(0, array.Length);
+        int index2 = random.Next(0, array.Length);
+        int temp = array[index1];
+        array[index1] = array[index2];
+        array[index2] = temp;
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     public static void Game()
     {
+        ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        /*var geneticAlgorithm = new GeneticAlgorithm(populationSize: 10, mutationRate: 0.01, crossoverRate: 0.8, elitismCount: 2);
+        var population = geneticAlgorithm.GeneratePopulation(chromosomeLength: 10, minValue: 0.0, maxValue: 1.0);
+
+        foreach (var candidate in population)
+        {
+            candidate.Fitness = CalculateFitness(candidate);
+        }
+
+        for (int i = 0; i < numGenerations; i++)
+        {
+            population = geneticAlgorithm.EvolvePopulation(population, minValue: 0.0, maxValue: 1.0);
+
+            foreach (var candidate in population)
+            {
+                candidate.Fitness = CalculateFitness(candidate);
+            }
+        }
+
+        // Get the best candidate in the final population
+        var bestCandidate = population.OrderByDescending(c => c.Fitness).First();
+        Console.WriteLine($"Best candidate: {string.Join(", ", bestCandidate.Parameters)}");*/
+        ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+
+
+
+
+
+        //var geneticAlgorithm = new GeneticAlgorithm(populationSize: 10, mutationRate: 0.01, crossoverRate: 0.8, elitismCount: 2);
+        //var population = geneticAlgorithm.GeneratePopulation(chromosomeLength: 10, minValue: 0.0, maxValue: 1.0);
+
+
         int[][] Board = new int[3][];
         Board[0] = new int[3] { 0, 0, 0 };
         Board[1] = new int[3] { 0, 0, 0 };
         Board[2] = new int[3] { 0, 0, 0 };
 
+
+        // false = X
+        //  true = O
         bool turn = false;
         bool failedTurn = false;
 
         int tempInt;
 
-        //Console.ReadKey(true);
-        // false = X
-        //  true = O
 
-        while (!(CheckState(Board) || !Board.SelectMany(x => x).Any(x => x == 0)))
+        while (!(CheckState(Board).Item1 || !Board.SelectMany(x => x).Any(x => x == 0)))
         {
         failedTurn:
             Console.Clear();
@@ -109,10 +324,14 @@ class Program
             turn = !turn;
             failedTurn = false;
         }
+        //int tempInt;
+
+        //Console.ReadKey(true);
+        
 
         Console.Clear();
         PrintTicTacToe(Board);
-        if (CheckState(Board))
+        if (CheckState(Board).Item1)
         {
             Console.WriteLine("Congrats \"" + XY(!turn) + "\", You won!");
         }
@@ -122,7 +341,20 @@ class Program
         }
         Console.ReadKey(true);
     }
-    
+
+
+    public static double EvaluateFitness(int[][] Board)
+    {
+        if (CheckState(Board).Item2 == 1)
+        {
+            return 1.0;
+        } else
+        {
+            return 0.0;
+        }
+    }
+
+
     public static string XY(bool turn)
     {
         if (turn == false)
@@ -135,53 +367,57 @@ class Program
         }
     }
 
-    public static bool CheckState(int[][] Board)
+
+
+    public static Tuple<bool, int> CheckState(int[][] Board)
     {
-        if (CheckStateVertical(Board))
+        if (CheckStateVertical(Board).Item1)
         {
-            return true;
-        } else if (CheckStateHorizontal(Board))
+            return CheckStateVertical(Board);
+        } else if (CheckStateHorizontal(Board).Item1)
         {
-            return true;
-        } else if (CheckStateDiagonal(Board))
+            return CheckStateHorizontal(Board);
+        } else if (CheckStateDiagonal(Board).Item1)
         {
-            return true;
+            return CheckStateDiagonal(Board);
         }
-        return false;
+        return Tuple.Create(false, 0);
     }
-    public static bool CheckStateVertical(int[][] Board)
+    public static Tuple<bool, int> CheckStateVertical(int[][] Board)
     {
         for (int iterate = 0; iterate <= 2; iterate++)
         {
             if (Board[iterate][0] == Board[iterate][1] && Board[iterate][1] == Board[iterate][2] && Board[iterate][0] != 0)
             {
-                return true;
+                return Tuple.Create(true, Board[iterate][0]);
             }
         }
-        return false;
+        return Tuple.Create(false, 0);
     }
-    public static bool CheckStateHorizontal(int[][] Board)
+    public static Tuple<bool, int> CheckStateHorizontal(int[][] Board)
     {
         for (int iterate = 0; iterate <= 2; iterate++)
         {
             if (Board[0][iterate] == Board[1][iterate] && Board[1][iterate] == Board[2][iterate] && Board[0][iterate] != 0)
             {
-                return true;
+                return Tuple.Create(true, Board[0][iterate]);
             }
         }
-        return false;
+        return Tuple.Create(false, 0);
     }
-    public static bool CheckStateDiagonal(int[][] Board)
+    public static Tuple<bool, int> CheckStateDiagonal(int[][] Board)
     {
         if (Board[0][0] == Board[1][1] && Board[1][1] == Board[2][2] && Board[0][0] != 0)
         {
-            return true;
+            return Tuple.Create(true, Board[0][0]);
         } else if (Board[2][0] == Board[1][1] && Board[1][1] == Board[0][2] && Board[2][0] != 0)
         {
-            return true;
+            return Tuple.Create(true, Board[2][0]);
         }
-        return false;
+        return Tuple.Create(false, 0);
     }
+
+
 
     public static void PrintTicTacToe(int[][] TicTacToe)
     {
@@ -220,109 +456,5 @@ class Program
         }
 
         Board.Print(board);
-    }
-
-
-
-
-
-
-    public void AI (int Board)
-    {
-        // Define a neural network with one hidden layer and one output neuron
-        int numInputNodes = 9;
-        int numHiddenNodes = 3;
-        int numOutputNodes = 1;
-        double learningRate = 0.1;
-
-        double[,] input = new double[,] { { 0, 0 }, { 0, 1 }, { 1, 0 }, { 1, 1 } };
-        double[,] output = new double[,] { { 0 }, { 1 }, { 1 }, { 0 } };
-
-        // Initialize weights with random values
-        double[,] hiddenWeights = new double[numInputNodes, numHiddenNodes];
-        double[,] outputWeights = new double[numHiddenNodes, numOutputNodes];
-        Random rand = new Random();
-        for (int i = 0; i < numInputNodes; i++)
-        {
-            for (int j = 0; j < numHiddenNodes; j++)
-            {
-                hiddenWeights[i, j] = rand.NextDouble() - 0.5;
-            }
-        }
-        for (int i = 0; i < numHiddenNodes; i++)
-        {
-            for (int j = 0; j < numOutputNodes; j++)
-            {
-                outputWeights[i, j] = rand.NextDouble() - 0.5;
-            }
-        }
-
-        // Train the network using backpropagation
-        for (int epoch = 0; epoch < 1000; epoch++)
-        {
-            for (int i = 0; i < input.GetLength(0); i++)
-            {
-                // Forward pass
-                double[] hiddenLayerOutput = new double[numHiddenNodes];
-                double[] outputLayerOutput = new double[numOutputNodes];
-
-                for (int j = 0; j < numHiddenNodes; j++)
-                {
-                    double sum = 0;
-                    // Calculate hidden layer output
-                    for (int k = 0; k < numInputNodes; k++)
-                    {
-                        sum += input[i, k] * hiddenWeights[k, j];
-                    }
-                    hiddenLayerOutput[j] = Math.Tanh(sum);
-                }
-
-                // Calculate output layer output
-                for (int j = 0; j < numOutputNodes; j++)
-                {
-                    double sum = 0;
-                    for (int k = 0; k < numHiddenNodes; k++)
-                    {
-                        sum += hiddenLayerOutput[k] * outputWeights[k, j];
-                    }
-                    outputLayerOutput[j] = Math.Tanh(sum);
-                }
-
-                // Backward pass
-                double[] outputError = new double[numOutputNodes];
-                for (int j = 0; j < numOutputNodes; j++)
-                {
-                    outputError[j] = (output[i, j] - outputLayerOutput[j]) * (1 - outputLayerOutput[j] * outputLayerOutput[j]);
-                }
-
-                double[] hiddenError = new double[numHiddenNodes];
-                for (int j = 0; j < numHiddenNodes; j++)
-                {
-                    double sum = 0;
-                    for (int k = 0; k < numOutputNodes; k++)
-                    {
-                        sum += outputError[k] * outputWeights[j, k];
-                    }
-                    hiddenError[j] = sum * (1 - hiddenLayerOutput[j] * hiddenLayerOutput[j]);
-                }
-
-                // Update weights
-                for (int j = 0; j < numHiddenNodes; j++)
-                {
-                    for (int k = 0; k < numInputNodes; k++)
-                    {
-                        hiddenWeights[k, j] += learningRate * hiddenError[j] * input[i, k];
-                    }
-                }
-
-                for (int j = 0; j < numOutputNodes; j++)
-                {
-                    for (int k = 0; k < numHiddenNodes; k++)
-                    {
-                        outputWeights[k, j] += learningRate * outputError[j] * hiddenLayerOutput[k];
-                    }
-                }
-            }
-        }
     }
 }
