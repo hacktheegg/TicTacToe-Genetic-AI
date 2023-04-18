@@ -18,36 +18,55 @@ class Program
 
         int GenomeLength = 9;
         int GenomeValueMax = 8;
+        int GenomeAmount = 9;
 
+        int[] stats = new int[3];
+
+        int loop = 1;
 
         /////////////////
         // Innitialise //
         /////////////////
-        int[] GenomeA = AI.GenerateRandomArray(GenomeLength, GenomeValueMax);
-        int[] GenomeB = AI.GenerateRandomArray(GenomeLength, GenomeValueMax);
+        int[][] GenomeA = new int[GenomeAmount][];
+        int[][] GenomeB = new int[GenomeAmount][];
+        for (int i = 0; i < GenomeAmount; i++)
+        {
+            GenomeA[i] = AI.GenerateRandomArray(GenomeLength, GenomeValueMax);
+            GenomeB[i] = AI.GenerateRandomArray(GenomeLength, GenomeValueMax);
+        }
+        
 
 
         while (true)
         {
-            bool[] winner = Game(GenomeA, GenomeB);
+            bool[] winner = Game(GenomeA, GenomeB, GenomeAmount);
 
             if (winner[1])
             {
                 if (!winner[0])
                 {
+                    stats[0]++;
+
                     //int[] GenomeAMutated = AI.Mutate(GenomeA, GenomeValueMax);
-                    GenomeB = AI.Mutate(GenomeB, GenomeValueMax);
+                    GenomeB = AI.Mutate(GenomeB, GenomeValueMax, GenomeAmount);
                 } else
                 {
+                    stats[1]++;
+
                     //int[] GenomeBMutated = AI.Mutate(GenomeA, GenomeValueMax);
-                    GenomeA = AI.Mutate(GenomeA, GenomeValueMax);
+                    GenomeA = AI.Mutate(GenomeA, GenomeValueMax, GenomeAmount);
                 }
             } else
             {
-                GenomeB = AI.Mutate(GenomeB, GenomeValueMax);
-                GenomeA = AI.Mutate(GenomeA, GenomeValueMax);
+                stats[2]++;
+
+                GenomeB = AI.Mutate(GenomeB, GenomeValueMax, GenomeAmount);
+                GenomeA = AI.Mutate(GenomeA, GenomeValueMax, GenomeAmount);
             }
-            
+
+            Console.WriteLine(stats[0] + ", " + stats[1] + ", " + stats[2]);
+
+            loop++;
         }
     }
 
@@ -66,12 +85,13 @@ class Program
             }
             return array;
         }
-        public static int[] Mutate(int[] Genome, int GenomeValueMax)
+        public static int[][] Mutate(int[][] Genome, int GenomeValueMax, int GenomeAmount)
         {
             Random random = new Random();
 
-            int randomIndex = random.Next(0, Genome.Length);
-            Genome[randomIndex] = random.Next(1, GenomeValueMax);
+            int randomGenome = random.Next(0, GenomeAmount);
+            int randomIndex = random.Next(0, Genome.Length - 1);
+            Genome[randomGenome][randomIndex] = random.Next(1, GenomeValueMax);
 
             return Genome;
         }
@@ -79,7 +99,7 @@ class Program
 
 
 
-    public static bool[] Game(int[] GenomeA, int[] GenomeB)
+    public static bool[] Game(int[][] GenomeA, int[][] GenomeB, int GenomeAmount)
     {
         int[][] Board = new int[3][];
         Board[0] = new int[3] { 0, 0, 0 };
@@ -97,50 +117,59 @@ class Program
 
         while (!(CheckState(Board) || !Board.SelectMany(x => x).Any(x => x == 0)))
         {
-            Thread.Sleep(250);
+            //Thread.Sleep(25);
 
-            Console.Clear();
-            PrintTicTacToe(Board);
+            //Console.Clear();
+            //PrintTicTacToe(Board);
 
             int CurrentMove;
+            int CurrentSubGenome = 0;
+
+            int[][] CurrentGenome;
 
             if (!turn)
             {
-                CurrentMove = GenomeA[TurnNo];
+                CurrentGenome = GenomeA;
             } else
             {
-                CurrentMove = GenomeB[TurnNo];
+                CurrentGenome = GenomeB;
             }
 
-            failedTurn:
+        failedTurn:
 
-
-            int XAxis;
-            int YAxis;
 
             
+            CurrentMove = CurrentGenome[CurrentSubGenome][TurnNo];
 
-            if (!turn)
-            {
-                XAxis = CurrentMove % 3;
-                YAxis = Convert.ToInt32(Math.Floor((float)(CurrentMove / 3)));
-            } else
-            {
-                XAxis = CurrentMove % 3;
-                YAxis = Convert.ToInt32(Math.Floor((float)(CurrentMove / 3)));
-            }
+
+
+            int XAxis = CurrentMove % 3;
+            int YAxis = Convert.ToInt32(Math.Floor((float)(CurrentMove / 3)));
 
 
 
             if (Board[YAxis][XAxis] != 0)
             {
-                CurrentMove++;
-
-                if (CurrentMove > 8)
+                if (CurrentSubGenome < CurrentGenome.Length - 1)
                 {
-                    CurrentMove = 0;
+                    CurrentSubGenome++;
+
+                    goto failedTurn;
+                } else
+                {
+                    while (Board[YAxis][XAxis] != 0)
+                    {
+                        CurrentMove++;
+
+                        if (CurrentMove > 8)
+                        {
+                            CurrentMove = 0;
+                        }
+
+                        XAxis = CurrentMove % 3;
+                        YAxis = Convert.ToInt32(Math.Floor((float)(CurrentMove / 3)));
+                    }
                 }
-                goto failedTurn;
             }
 
 
@@ -160,17 +189,17 @@ class Program
         //int tempInt;
 
         //Console.ReadKey(true);
-        
 
-        Console.Clear();
-        PrintTicTacToe(Board);
+        //Thread.Sleep(25);
+        //Console.Clear();
+        //PrintTicTacToe(Board);
         if (CheckState(Board))
         {
-            Console.WriteLine("Congrats \"" + XY(!turn) + "\", You won!");
+            //Console.WriteLine("Congrats \"" + XY(!turn) + "\", You won!");
         }
         else
         {
-            Console.WriteLine("It seems it is a tie, Good game for both sides.");
+            //Console.WriteLine("It seems it is a tie, Good game for both sides.");
         }
         //Console.ReadKey(true);
         bool[] returnBool = { !turn, CheckState(Board) };
