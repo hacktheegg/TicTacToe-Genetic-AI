@@ -19,29 +19,92 @@ class Program
         int GenomeLength = 9;
         int GenomeValueMax = 8;
         int GenomeAmount = 9;
+        int AmountMutated = 2;
 
-        int[] stats = new int[3];
+        int PopulationSize = 500;
+
+        float[][] stats = new float[2][];
+        stats[0] = new float[PopulationSize];
+        stats[1] = new float[PopulationSize];
 
         int loop = 1;
+        float[] statsPercentage = new float[2];
+
 
         /////////////////
         // Innitialise //
         /////////////////
-        int[][] GenomeA = new int[GenomeAmount][];
-        int[][] GenomeB = new int[GenomeAmount][];
-        for (int i = 0; i < GenomeAmount; i++)
+        int[][][] GenomeA = new int[PopulationSize][][];
+        int[][][] GenomeB = new int[PopulationSize][][];
+        for (int i = 0; i < PopulationSize; i++)
         {
-            GenomeA[i] = AI.GenerateRandomArray(GenomeLength, GenomeValueMax);
-            GenomeB[i] = AI.GenerateRandomArray(GenomeLength, GenomeValueMax);
+            GenomeA[i] = new int[GenomeAmount][];
+            GenomeB[i] = new int[GenomeAmount][];
+
+            for (int j = 0; j < GenomeAmount; j++)
+            {
+                GenomeA[i][j] = AI.GenerateRandomArray(GenomeLength, GenomeValueMax);
+                GenomeB[i][j] = AI.GenerateRandomArray(GenomeLength, GenomeValueMax);
+            }
         }
         
-
+        
 
         while (true)
         {
-            bool[] winner = Game(GenomeA, GenomeB, GenomeAmount);
+            stats[0] = new float[PopulationSize];
+            stats[1] = new float[PopulationSize];
 
-            if (winner[1])
+            bool[] winner;
+
+            for (int i = 0; i < PopulationSize; i++)
+            {
+                for (int j = 0; j < PopulationSize; j++)
+                {
+                    winner = Game(GenomeA[i], GenomeB[j]);
+
+                    if (winner[1])
+                    {
+                        if (!winner[0])
+                        {
+                            stats[0][i]++;
+                        }
+                        else
+                        {
+                            stats[1][j]++;
+                        }
+                    } else
+                    {
+                        stats[0][i] += (float)0.5;
+                        stats[1][j] += (float)0.5;
+                    }
+                }
+            }
+
+
+
+            int[][] BestParentA = AI.BestParent(GenomeA, stats[0]);
+            int[][] BestParentB = AI.BestParent(GenomeB, stats[1]);
+
+
+
+            GenomeA = AI.EvolvePopulation(BestParentA, GenomeValueMax, GenomeAmount, PopulationSize, AmountMutated);
+            GenomeB = AI.EvolvePopulation(BestParentB, GenomeValueMax, GenomeAmount, PopulationSize, AmountMutated);
+
+
+
+            statsPercentage[0] = stats[0].Sum() + statsPercentage[0];
+            statsPercentage[1] = stats[1].Sum() + statsPercentage[1];
+
+            Console.WriteLine($"" +
+                    $"%{(float)statsPercentage[0] / (float)statsPercentage.Sum() * 100 + ", ",-15} " +
+                    $"%{(float)statsPercentage[1] / (float)statsPercentage.Sum() * 100 + ", ",-15}");
+
+
+
+
+
+            /*if (winner[1])
             {
                 if (!winner[0])
                 {
@@ -49,14 +112,16 @@ class Program
 
                     //int[] GenomeAMutated = AI.Mutate(GenomeA, GenomeValueMax);
                     GenomeB = AI.Mutate(GenomeB, GenomeValueMax, GenomeAmount);
-                } else
+                }
+                else
                 {
                     stats[1]++;
 
                     //int[] GenomeBMutated = AI.Mutate(GenomeA, GenomeValueMax);
                     GenomeA = AI.Mutate(GenomeA, GenomeValueMax, GenomeAmount);
                 }
-            } else
+            }
+            else
             {
                 stats[2]++;
 
@@ -64,9 +129,21 @@ class Program
                 GenomeA = AI.Mutate(GenomeA, GenomeValueMax, GenomeAmount);
             }
 
-            Console.WriteLine(stats[0] + ", " + stats[1] + ", " + stats[2]);
 
-            loop++;
+
+            if (loop % 10000 == 0)
+            {
+                //Console.WriteLine(
+                //(float)stats[0] / (float)stats.Sum() + ", " + 
+                //(float)stats[1] / (float)stats.Sum() + ", " + 
+                //(float)stats[2] / (float)stats.Sum());
+                Console.WriteLine($"" +
+                    $"%{(float)stats[0] / (float)stats.Sum() * 100 + ", ",-15} " +
+                    $"%{(float)stats[1] / (float)stats.Sum() * 100 + ", ",-15} " +
+                    $"%{(float)stats[2] / (float)stats.Sum() * 100}");
+            }
+
+            loop++;*/
         }
     }
 
@@ -85,21 +162,51 @@ class Program
             }
             return array;
         }
-        public static int[][] Mutate(int[][] Genome, int GenomeValueMax, int GenomeAmount)
+        public static int[][] Mutate(int[][] Genome, int GenomeValueMax, int GenomeAmount, int AmountMutated)
         {
             Random random = new Random();
 
-            int randomGenome = random.Next(0, GenomeAmount);
-            int randomIndex = random.Next(0, Genome.Length - 1);
-            Genome[randomGenome][randomIndex] = random.Next(1, GenomeValueMax);
-
+            for (int i = 0; i < AmountMutated; i++)
+            {
+                int randomGenome = random.Next(0, GenomeAmount);
+                int randomIndex = random.Next(0, Genome.Length - 1);
+                Genome[randomGenome][randomIndex] = random.Next(1, GenomeValueMax);
+            }
+            
             return Genome;
+        }
+        public static int[][] BestParent(int[][][] population, float[] stats)
+        {
+            int best = 0;
+
+            for (int i = 0; i < stats.Length; i++)
+            {
+                if (stats[i] > stats[best])
+                {
+                    best = i;
+                }
+            }
+
+            //Console.WriteLine(stats[best]);
+
+            return population[best];
+        }
+        public static int[][][] EvolvePopulation(int[][] BestParent, int GenomeValueMax, int GenomeAmount, int PopulationSize, int AmountMutated)
+        {
+            int[][][] EvolvedGenome = new int[PopulationSize][][];
+
+            for (int i = 0; i < PopulationSize; i++)
+            {
+                EvolvedGenome[i] = Mutate(BestParent, GenomeValueMax, GenomeAmount, AmountMutated);
+            }
+
+            return EvolvedGenome;
         }
     }
 
 
 
-    public static bool[] Game(int[][] GenomeA, int[][] GenomeB, int GenomeAmount)
+    public static bool[] Game(int[][] GenomeA, int[][] GenomeB)
     {
         int[][] Board = new int[3][];
         Board[0] = new int[3] { 0, 0, 0 };
